@@ -1,0 +1,26 @@
+FROM alpine:latest
+ RUN apk update && \
+     apk upgrade && \
+     apk add py3-pip-tools && \
+     apk add py3-gunicorn && \
+     apk add inotify-tools && \
+     addgroup alfred && \
+     adduser -D -H alfred -G alfred
+ RUN mkdir -p /app && chown -R alfred:alfred /app
+ RUN mkdir -p /data && chown -R alfred:alfred /data
+COPY movies-api.py /app/movies-api.py     
+COPY movies-cache.py /app/movies-cache.py    
+COPY entrypoint.sh /app/entrypoint.sh   
+ RUN chmod +x /app/movies-api.py /app/movies-cache.py /app/entrypoint.sh
+USER alfred:alfred
+ RUN python -m venv /app && \
+     . /app/bin/activate && \
+     pip install --upgrade pip && \
+     pip install orjson && \
+     pip install flask && \
+     pip install gunicorn && \
+     pip install boto3 
+WORKDIR /app 
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+EXPOSE 8000
