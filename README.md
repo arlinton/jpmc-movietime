@@ -8,7 +8,8 @@
 
 ### All Movies
 
- * GET `curl https://server/movies`
+ * GET 
+   * `curl https://server/movies`
 
 ### Search by movie title
 
