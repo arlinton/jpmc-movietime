@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    alb.ingress.kubernetes.io/auth-session-timeout: "86400"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.JPMCMovieTime.aws.certificate_arn }}
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=false,idle_timeout.timeout_seconds=4000,routing.http.drop_invalid_header_fields.enabled=true
+    alb.ingress.kubernetes.io/load-balancer-name: "{{ .Release.Name}}-{{ .Release.Namespace}}-k8s-ingress"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/success-codes: 200,404,302
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb 
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: {{ .Release.Name }}-api
+            port:
+              number: 8000
+        path: /
+        pathType: ImplementationSpecific
+      - backend:
+          service:
+            name: {{ .Release.Name }}-api
+            port:
+              number: 8000
+        path: /*
+        pathType: ImplementationSpecific

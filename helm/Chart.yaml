@@ -1,0 +1,4 @@
+apiVersion: v2
+name: jpmc-movietime-chart
+description: A Helm chart the JPMC Movietime API
+version: 0.1.0

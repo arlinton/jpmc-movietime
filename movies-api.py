@@ -60,11 +60,17 @@ def getMovieResult(index):
 
 @movieTime.errorhandler(404)
 def princessInAnotherCastle(e):
-    return "The Princess is in another Castle"
+    print(e)
+    return "The Princess is in another Castle", 404
 
 @movieTime.errorhandler(500)
 def ouchIse(e):
-    return "Ouch! Something is wrong."
+    print(e)
+    return "Ouch! Something is wrong.", 500
+
+@movieTime.route('/health')
+def health():
+    return "The Princess is in another Castle and healthy"
 
 @movieTime.route('/movies/year/<string:key>')
 def getMovieYear(key):

@@ -1,0 +1,29 @@
+JPMCMovieTimeGenCache:
+  image:
+    repository: 339713119331.dkr.ecr.us-east-2.amazonaws.com/jpmc/movietime
+    tag: "latest"
+  resourcesLimit:
+    cpu: "2048m"
+    memory: "384Mi"
+  resourcesRequest:
+    cpu: "500m"
+    memory: "128Mi"
+  aws:
+    certificate_arn: arn:aws:acm:us-east-2:058264072903:certificate/849866c6-978e-4f87-b514-087319c74df4
+  ABMovieS3URL: "s3://ab-movie-db-stor/wikipedia-movie-data/movies.json"
+
+JPMCMovieTime:
+  image:
+    repository: 339713119331.dkr.ecr.us-east-2.amazonaws.com/jpmc/movietime
+    tag: "latest"
+  resourcesLimit:
+    cpu: "1000"
+    memory: "196Mi"
+  resourcesRequest:
+    cpu: "500m"
+    memory: "128Mi"
+  service:
+    port: 8000
+  aws:
+    certificate_arn: arn:aws:acm:us-east-2:058264072903:certificate/849866c6-978e-4f87-b514-087319c74df4
+  ABMovieS3URL: "s3://ab-movie-db-stor/wikipedia-movie-data/movies.json"

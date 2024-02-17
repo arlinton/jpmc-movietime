@@ -5,9 +5,9 @@ import boto3
 import botocore
 import os
 import re
-import sys
 import multiprocessing
 import traceback
+import time
 #
 # Looking to query by:
 #  - Year
@@ -24,8 +24,8 @@ cacheAllYears = set()
 cacheAllTitles = set()
 cacheAllCast = set()
 cacheAllGenres = set()
-cachedIndexFile = "movie-query-cache-index.json"
-movieJsonFile = "movie-copy.json"
+cachedIndexFile = "/data/movie-query-cache-index.json"
+movieJsonFile = "/data/movie-copy.json"
 
 if (os.environ.get('AB_MOVIE_S3_URL') == None):
     url = ''
@@ -60,6 +60,8 @@ def getMoviesFromS3(url):
                 movies_initial = orjson.loads(moviesJson)
                 movies = movies_initial
                 cacheFu() 
+                with open(movieJsonFile, "wb") as movieFileD:
+                    movieFileD.write(moviesJson)
         except Exception as e:
             print("[ERROR] Error accesssing S3: %s." % (url))
             print(traceback.format_exec())
@@ -140,8 +142,6 @@ def cacheFu():
     with multiprocessing.Pool(initializer=init_worker, initargs=(sq,)) as pool:
         _ = pool.imap(cacheStoreYear,cacheAllYears)
         for i,v in enumerate(cacheAllYears):
-            sys.stdout.write("Year Cache Generation: %-3d%% \r" % (i/len(cacheAllYears)*100))
-            sys.stdout.flush()
             r = sq.get()
             for k in r:
                 cacheMovies["year"][k]=r[k]
@@ -149,8 +149,6 @@ def cacheFu():
     with multiprocessing.Pool(initializer=init_worker, initargs=(sq,)) as pool:
         _ = pool.imap(cacheStoreGenres,cacheAllGenres)
         for i,v in enumerate(cacheAllGenres):
-            sys.stdout.write("Genre Cache Generation: %-3d%% \r" % (i/len(cacheAllGenres)*100))
-            sys.stdout.flush()
             r = sq.get()
             for k in r:
                 cacheMovies["genres"][k]=r[k]
@@ -158,8 +156,6 @@ def cacheFu():
     with multiprocessing.Pool(initializer=init_worker, initargs=(sq,)) as pool:
         _ = pool.imap(cacheStoreTitle,cacheAllTitles)
         for i,v in enumerate(cacheAllTitles):
-            sys.stdout.write("Title Cache Generation: %-3d%% \r" % (i/len(cacheAllTitles)*100))
-            sys.stdout.flush()
             r = sq.get()
             for k in r:
                 cacheMovies["titles"][k]=r[k]
@@ -167,8 +163,6 @@ def cacheFu():
     with multiprocessing.Pool(initializer=init_worker, initargs=(sq,)) as pool:
         pool.imap(cacheStoreCast,cacheAllCast)
         for i,v in enumerate(cacheAllCast):
-            sys.stdout.write("Cast Cache Generation: %-3d%% \r" % (i/len(cacheAllCast)*100))
-            sys.stdout.flush()
             r = sq.get()
             for k in r:
                 cacheMovies["cast"][k]=r[k]
@@ -176,7 +170,6 @@ def cacheFu():
         json.dump(cacheMovies, cacheFile)
  
 # let's get started
-getMoviesFromS3(url)
-
-with open(movieJsonFile, "wb") as movieFileD:
-    movieFileD.write(moviesJson)
+while True:
+    getMoviesFromS3(url)
+    time.sleep(30) 
